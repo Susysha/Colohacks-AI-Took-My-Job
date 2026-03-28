@@ -9,6 +9,7 @@ export const authRouter = express.Router();
 function sanitizeUser(user) {
   return {
     id: user.userId || user.id,
+    hospitalId: user.hospitalId || "",
     loginId: user.loginId,
     email: user.email,
     name: user.name,

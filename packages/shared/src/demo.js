@@ -1,4 +1,34 @@
+export const demoHospitals = [
+  {
+    hospitalId: "hospital-1",
+    name: "Sadar General Hospital",
+    code: "SGH",
+    address: "Sadar District Campus",
+    isActive: true
+  },
+  {
+    hospitalId: "hospital-2",
+    name: "City Tertiary Hospital",
+    code: "CTH",
+    address: "City Medical Corridor",
+    isActive: true
+  }
+];
+
 export const demoUsers = [
+  {
+    id: "super-admin-1",
+    loginId: "SUPER-ADMIN-001",
+    email: "superadmin@medirelay.demo",
+    password: "medirelay123",
+    name: "MediRelay Network Super Admin",
+    role: "system_admin",
+    department: "Platform Administration",
+    facility: "MediRelay Network",
+    hospitalId: "",
+    isActive: true,
+    forcePasswordChange: false
+  },
   {
     id: "admin-1",
     loginId: "HOSP-ADMIN-001",
@@ -8,6 +38,7 @@ export const demoUsers = [
     role: "hospital_admin",
     department: "Administration",
     facility: "Sadar General Hospital",
+    hospitalId: "hospital-1",
     isActive: true,
     forcePasswordChange: false
   },
@@ -20,6 +51,7 @@ export const demoUsers = [
     role: "doctor",
     department: "Emergency",
     facility: "Sadar General Hospital",
+    hospitalId: "hospital-1",
     isActive: true,
     forcePasswordChange: false
   },
@@ -32,6 +64,7 @@ export const demoUsers = [
     role: "doctor",
     department: "Cardiology",
     facility: "City Tertiary Hospital",
+    hospitalId: "hospital-2",
     isActive: true,
     forcePasswordChange: false
   },
@@ -44,6 +77,7 @@ export const demoUsers = [
     role: "nurse",
     department: "Emergency",
     facility: "Sadar General Hospital",
+    hospitalId: "hospital-1",
     isActive: true,
     forcePasswordChange: false
   }

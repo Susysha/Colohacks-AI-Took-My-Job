@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createStaff, deactivateStaff, fetchAdminDashboard, login, updateStaff } from "../lib/api.js";
+import { createStaff, fetchAdminDashboard, login, updateStaff } from "../lib/api.js";
 
 const initialCredentials = {
   identifier: "HOSP-ADMIN-001",
@@ -10,8 +10,8 @@ const initialStaffForm = {
   name: "",
   role: "doctor",
   department: "",
-  facility: "",
-  email: ""
+  email: "",
+  password: ""
 };
 
 export default function AdminPage() {
@@ -21,6 +21,21 @@ export default function AdminPage() {
   const [status, setStatus] = useState("Hospital admin portal ready.");
   const [staffForm, setStaffForm] = useState(initialStaffForm);
   const [generatedCredentials, setGeneratedCredentials] = useState(null);
+  const [isCreatingStaff, setIsCreatingStaff] = useState(false);
+  const [selectedRoleBreakdown, setSelectedRoleBreakdown] = useState(null);
+
+  const activeDoctors = (dashboard?.staff || [])
+    .filter((member) => member.isActive && member.role === "doctor")
+    .sort((left, right) => left.name.localeCompare(right.name));
+  const activeNurses = (dashboard?.staff || [])
+    .filter((member) => member.isActive && member.role === "nurse")
+    .sort((left, right) => left.name.localeCompare(right.name));
+  const selectedRoleMembers = selectedRoleBreakdown === "doctor"
+    ? activeDoctors
+    : selectedRoleBreakdown === "nurse"
+      ? activeNurses
+      : [];
+  const selectedRoleTitle = selectedRoleBreakdown === "doctor" ? "Active doctors" : "Active nurses";
 
   async function loadDashboard(accessToken = session?.accessToken) {
     if (!accessToken) return;
@@ -48,36 +63,29 @@ export default function AdminPage() {
   }
 
   async function handleCreateStaff() {
+    if (isCreatingStaff) {
+      return;
+    }
+
+    setIsCreatingStaff(true);
     try {
-      const result = await createStaff(session.accessToken, {
-        ...staffForm,
-        facility: staffForm.facility || session.user.facility
-      });
+      const result = await createStaff(session.accessToken, staffForm);
       setGeneratedCredentials(result.credentials);
       setStaffForm(initialStaffForm);
       await loadDashboard();
       setStatus(`Created ${result.staff.name}.`);
     } catch (error) {
       setStatus(error.message);
+    } finally {
+      setIsCreatingStaff(false);
     }
   }
 
-  async function handleDeactivate(userId) {
+  async function handleAccessToggle(member) {
     try {
-      await deactivateStaff(session.accessToken, userId);
+      await updateStaff(session.accessToken, member.userId, { isActive: !member.isActive });
       await loadDashboard();
-      setStatus("Staff access removed.");
-    } catch (error) {
-      setStatus(error.message);
-    }
-  }
-
-  async function handleReset(userId) {
-    try {
-      const result = await updateStaff(session.accessToken, userId, { resetPassword: true });
-      setGeneratedCredentials(result.credentials);
-      await loadDashboard();
-      setStatus("Temporary password reset.");
+      setStatus(member.isActive ? "Staff access removed." : "Staff access granted.");
     } catch (error) {
       setStatus(error.message);
     }
@@ -127,7 +135,7 @@ export default function AdminPage() {
           <article className="content-panel sender-form-panel">
             <div className="section-heading">
               <h3>Create Staff Credentials</h3>
-              <p>Hospital admins issue the login ID and temporary password.</p>
+              <p>Hospital admins issue the login ID and temporary password. You can set the temporary password yourself or leave it blank to auto-generate one.</p>
             </div>
             <div className="sender-columns">
               <input
@@ -146,19 +154,28 @@ export default function AdminPage() {
                 placeholder="Department"
               />
               <input
-                value={staffForm.facility}
-                onChange={(event) => setStaffForm((current) => ({ ...current, facility: event.target.value }))}
-                placeholder={session.user.facility}
+                value={session.user.facility}
+                disabled
+                placeholder="Assigned hospital"
               />
               <input
                 value={staffForm.email}
                 onChange={(event) => setStaffForm((current) => ({ ...current, email: event.target.value }))}
                 placeholder="Email (optional)"
               />
+              <input
+                value={staffForm.password}
+                onChange={(event) => setStaffForm((current) => ({ ...current, password: event.target.value }))}
+                placeholder="Temporary password (optional)"
+                type="password"
+              />
             </div>
+            <p style={{ color: "var(--text-soft)" }}>
+              Staff members will still be forced to change this temporary password on first login.
+            </p>
             <div className="hero-actions">
-              <button className="primary-button" onClick={handleCreateStaff} type="button">
-                Create Staff
+              <button className="primary-button" disabled={isCreatingStaff} onClick={handleCreateStaff} type="button">
+                {isCreatingStaff ? "Creating staff..." : "Create Staff"}
               </button>
             </div>
             {generatedCredentials ? (
@@ -166,8 +183,28 @@ export default function AdminPage() {
                 <h4>Latest credentials</h4>
                 <p>Login ID: {generatedCredentials.loginId}</p>
                 <p>Temporary password: {generatedCredentials.temporaryPassword}</p>
+                <p>Source: {generatedCredentials.passwordSource === "manual" ? "Set by hospital admin" : "Auto-generated"}</p>
               </div>
             ) : null}
+
+            <div className="section-heading">
+              <h3>Doctor Patient Access</h3>
+              <p>Track exactly which doctor opened which patient record, with both IDs.</p>
+            </div>
+            <div className="timeline-list">
+              {dashboard?.doctorPatientAccess?.map((item, index) => (
+                <div className="timeline-card" key={`${item.handoffId}-${item.timestamp}-${index}`}>
+                  <span className="timeline-date">{new Date(item.timestamp).toLocaleString()}</span>
+                  <strong>
+                    {item.doctorName} ({item.doctorLoginId || item.doctorId || "Unknown doctor ID"})
+                  </strong>
+                  <p>{item.department || "No department"} | {item.accessFacility || "Unknown hospital"}</p>
+                  <p>
+                    {item.patientName} ({item.patientId || "Unknown patient ID"})
+                  </p>
+                </div>
+              ))}
+            </div>
 
             <div className="section-heading">
               <h3>Recent QR Logs</h3>
@@ -179,7 +216,7 @@ export default function AdminPage() {
                   <span className="timeline-date">{new Date(log.timestamp).toLocaleString()}</span>
                   <strong>{log.eventType}</strong>
                   <p>
-                    {log.actor} | {log.department || "No department"}
+                    {log.doctorName || log.actor} ({log.doctorLoginId || log.doctorId || "Unknown doctor ID"}) | {log.department || "No department"} | {log.accessFacility || "Unknown hospital"}
                   </p>
                   <p>
                     {log.patientName || "Unknown patient"} ({log.patientId || "Unknown ID"})
@@ -198,12 +235,47 @@ export default function AdminPage() {
             </div>
 
             <div className="ack-summary">
-              <h4>Department breakdown</h4>
-              {(dashboard?.departmentBreakdown || []).map((item) => (
-                <p key={item.department}>
-                  {item.department}: {item.staffCount}
-                </p>
-              ))}
+              <h4>Active staff breakdown</h4>
+              <div className="breakdown-grid">
+                <button
+                  className={`selector-card breakdown-card ${selectedRoleBreakdown === "doctor" ? "selected-card" : ""}`}
+                  onClick={() => setSelectedRoleBreakdown((current) => (current === "doctor" ? null : "doctor"))}
+                  type="button"
+                >
+                  <span className="timeline-date">Click to view</span>
+                  <strong>Active doctors</strong>
+                  <p>{activeDoctors.length} active</p>
+                </button>
+                <button
+                  className={`selector-card breakdown-card ${selectedRoleBreakdown === "nurse" ? "selected-card" : ""}`}
+                  onClick={() => setSelectedRoleBreakdown((current) => (current === "nurse" ? null : "nurse"))}
+                  type="button"
+                >
+                  <span className="timeline-date">Click to view</span>
+                  <strong>Active nurses</strong>
+                  <p>{activeNurses.length} active</p>
+                </button>
+              </div>
+
+              {selectedRoleBreakdown ? (
+                <div className="breakdown-list">
+                  <p className="breakdown-list-title">{selectedRoleTitle}</p>
+                  {selectedRoleMembers.length ? (
+                    selectedRoleMembers.map((member) => (
+                      <div className="breakdown-list-item" key={member.userId}>
+                        <strong>{member.name}</strong>
+                        <p>
+                          {member.loginId} | {member.department || "Unassigned"}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No active {selectedRoleBreakdown === "doctor" ? "doctors" : "nurses"} right now.</p>
+                  )}
+                </div>
+              ) : (
+                <p>Active doctors ya active nurses par click karke list dekho.</p>
+              )}
             </div>
 
             <div className="ack-summary">
@@ -219,7 +291,7 @@ export default function AdminPage() {
               <h4>Doctor access summary</h4>
               {(dashboard?.doctorAccessSummary || []).map((item) => (
                 <p key={item.doctorId || item.doctorName}>
-                  {item.doctorName} - {item.accessCount} access
+                  {item.doctorName} ({item.doctorLoginId || item.doctorId || "Unknown doctor ID"}) - {item.accessCount} access
                 </p>
               ))}
             </div>
@@ -236,11 +308,8 @@ export default function AdminPage() {
                   </p>
                   <p>{member.isActive ? "Active" : "Inactive"}</p>
                   <div className="hero-actions">
-                    <button className="secondary-button" onClick={() => handleReset(member.userId)} type="button">
-                      Reset password
-                    </button>
-                    <button className="secondary-button" onClick={() => handleDeactivate(member.userId)} type="button">
-                      Remove
+                    <button className="secondary-button" onClick={() => handleAccessToggle(member)} type="button">
+                      {member.isActive ? "Remove access" : "Grant access"}
                     </button>
                   </div>
                 </div>

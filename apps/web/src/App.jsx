@@ -4,6 +4,7 @@ import AdminPage from "./pages/AdminPage.jsx";
 import SenderPage from "./pages/SenderPage.jsx";
 import ReceiverPage from "./pages/ReceiverPage.jsx";
 import OfflineDecoderPage from "./pages/OfflineDecoderPage.jsx";
+import SuperAdminPage from "./pages/SuperAdminPage.jsx";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         </div>
         <nav className="topnav">
           <Link to="/">Home</Link>
+          <Link to="/superadmin">Super Admin</Link>
           <Link to="/sender">Doctor</Link>
           <Link to="/admin">Hospital Admin</Link>
           <Link to="/offline">Offline Decode</Link>
@@ -22,6 +24,7 @@ export default function App() {
       </header>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/superadmin" element={<SuperAdminPage />} />
         <Route path="/sender" element={<SenderPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/r/:shortCode" element={<ReceiverPage />} />

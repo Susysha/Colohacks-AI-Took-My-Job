@@ -5,6 +5,7 @@ import { requireAuth } from "./middleware/auth.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 import { adminRouter } from "./routes/adminRoutes.js";
 import { authRouter } from "./routes/authRoutes.js";
+import { superAdminRouter } from "./routes/superAdminRoutes.js";
 import { handleSync, transferRouter } from "./routes/transferRoutes.js";
 import { transcribeAudio } from "./services/whisperService.js";
 
@@ -48,6 +49,7 @@ export function createApp() {
   });
 
   app.use("/auth", authRouter);
+  app.use("/superadmin", superAdminRouter);
   app.use("/admin", adminRouter);
   app.post("/sync/batch", requireAuth, ...handleSync);
   app.use("/transfers", transferRouter);

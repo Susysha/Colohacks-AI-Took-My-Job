@@ -149,6 +149,13 @@ a {
   transform: translateY(-1px);
 }
 
+.primary-button:disabled,
+.secondary-button:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .critical-panel {
   display: grid;
   gap: 14px;
@@ -238,6 +245,185 @@ a {
   color: rgba(255, 255, 255, 0.78);
 }
 
+.sender-panel-switch {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sender-toggle-card {
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sender-toggle-card.active {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  border-color: transparent;
+}
+
+.sender-toggle-count {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.sender-toggle-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.sender-toggle-copy small {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.wizard-steps {
+  display: grid;
+  gap: 10px;
+}
+
+.wizard-step {
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wizard-step.active {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  border-color: transparent;
+}
+
+.wizard-step.done {
+  border-color: rgba(153, 246, 228, 0.4);
+  background: rgba(20, 184, 166, 0.14);
+}
+
+.wizard-step-count {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.wizard-step-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.wizard-step-copy small {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.wizard-step.active .wizard-step-copy small {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.sender-metrics {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metric-box {
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.metric-box strong {
+  font-size: 1.9rem;
+}
+
+.metric-box span {
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+}
+
+.sender-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.status-pill {
+  border-radius: 999px;
+  padding: 9px 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.review-helper,
+.copy-note {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.compact-actions {
+  margin-top: 12px;
+}
+
+.share-link-card {
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  word-break: break-all;
+}
+
+.share-link-card p {
+  margin: 0;
+}
+
+.large-qr-shell {
+  padding: 24px;
+}
+
 .warning-panel,
 .error-panel,
 .share-panel,
@@ -272,6 +458,43 @@ a {
   text-align: left;
   color: white;
   cursor: pointer;
+}
+
+.breakdown-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.breakdown-card {
+  width: 100%;
+  font: inherit;
+  appearance: none;
+  display: grid;
+  gap: 8px;
+}
+
+.breakdown-card strong,
+.breakdown-list-item strong {
+  font-size: 1rem;
+}
+
+.breakdown-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.breakdown-list-title {
+  margin: 0;
+  color: var(--mint) !important;
+  font-weight: 700;
+}
+
+.breakdown-list-item {
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
 }
 
 .selected-card {
@@ -397,9 +620,11 @@ textarea {
   .detail-grid,
   .sender-columns,
   .sender-list-grid,
+  .sender-panel-switch,
   .critical-panel,
   .form-grid,
-  .list-grid {
+  .list-grid,
+  .sender-metrics {
     grid-template-columns: 1fr;
   }
 

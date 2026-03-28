@@ -8,10 +8,12 @@ export default function HomePage() {
           <p className="eyebrow">Hospital-controlled authentication + QR tracking</p>
           <h2>Doctors scan the QR. Hospitals control every account.</h2>
           <p>
-            Hospitals create doctor and nurse accounts, doctors generate and scan QR records, and
-            every patient access stays visible to the admin dashboard.
+            Super admin creates hospitals, hospital admins create doctor and nurse accounts, doctors generate and scan QR records, and every patient access stays visible to the admin dashboard.
           </p>
           <div className="hero-actions">
+            <Link className="secondary-button" to="/superadmin">
+              Open super admin
+            </Link>
             <Link className="primary-button" to="/sender">
               Open doctor workspace
             </Link>
@@ -22,6 +24,7 @@ export default function HomePage() {
         </div>
         <div className="hero-panel">
           <h3>Demo credentials</h3>
+          <p>Super Admin: SUPER-ADMIN-001 / medirelay123</p>
           <p>Admin: HOSP-ADMIN-001 / medirelay123</p>
           <p>Doctor: DOC-1001 / medirelay123</p>
           <p>Nurse: NUR-1001 / medirelay123</p>

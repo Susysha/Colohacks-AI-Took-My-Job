@@ -67,9 +67,18 @@ export function Field({
   );
 }
 
-export function ActionButton({ label, onPress, variant = "primary" }) {
+export function ActionButton({ label, onPress, variant = "primary", disabled = false }) {
   return (
-    <Pressable style={({ pressed }) => [styles.button, buttonToneStyles[variant] || buttonToneStyles.primary, pressed && styles.buttonPressed]} onPress={onPress}>
+    <Pressable
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.button,
+        buttonToneStyles[variant] || buttonToneStyles.primary,
+        disabled && styles.buttonDisabled,
+        pressed && !disabled && styles.buttonPressed
+      ]}
+      onPress={onPress}
+    >
       <Text style={[styles.buttonText, buttonTextToneStyles[variant] || buttonTextToneStyles.primary]}>{label}</Text>
     </Pressable>
   );
@@ -290,6 +299,9 @@ const styles = StyleSheet.create({
   },
   buttonPressed: {
     opacity: 0.86
+  },
+  buttonDisabled: {
+    opacity: 0.58
   },
   buttonText: {
     fontSize: 15,

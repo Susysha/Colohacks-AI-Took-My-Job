@@ -31,12 +31,39 @@ function auditEnvelope(eventType, actor, record, metadata = {}) {
     actorUserId: actor?.userId || actor?.sub || "",
     actorRole: actor?.role || "",
     department: actor?.department || "",
-    facility: record?.sendingFacility || actor?.facility || metadata.facility || "",
+    facility: metadata.facility || actor?.facility || record?.sendingFacility || "",
+    hospitalId: metadata.hospitalId || metadata.accessHospitalId || actor?.hospitalId || "",
     patientId: record?.facilityPatientId || metadata.patientId || "",
     patientName: record?.patientDemographics?.name || metadata.patientName || "",
     tokenScope: metadata.tokenScope || "app",
     timestamp: new Date().toISOString(),
     metadata
+  };
+}
+
+async function enrichAuditMetadata(actor, record, metadata = {}) {
+  const actorFacility = actor?.facility || "";
+  const sendingFacility = metadata.sendingFacility || record?.sendingFacility || actorFacility || "";
+  const receivingFacility = metadata.receivingFacility || record?.receivingFacility || "";
+  const actorHospitalId =
+    actor?.hospitalId ||
+    (actorFacility ? (await store.findHospitalByName(actorFacility))?.hospitalId || "" : "");
+  const sendingHospitalId =
+    metadata.sendingHospitalId ||
+    (sendingFacility ? (await store.findHospitalByName(sendingFacility))?.hospitalId || "" : "");
+  const receivingHospitalId =
+    metadata.receivingHospitalId ||
+    (receivingFacility ? (await store.findHospitalByName(receivingFacility))?.hospitalId || "" : "");
+  const accessHospitalId = metadata.accessHospitalId || actorHospitalId || sendingHospitalId || "";
+
+  return {
+    ...metadata,
+    actorHospitalId,
+    sendingFacility,
+    sendingHospitalId,
+    receivingFacility,
+    receivingHospitalId,
+    accessHospitalId
   };
 }
 
@@ -59,11 +86,13 @@ export async function createTransfer(payload, actor) {
   };
 
   await store.saveTransfer(record);
+  const auditMetadata = await enrichAuditMetadata(actor, record, {
+    transferChainId,
+    tokenScope: "app",
+    hospitalId: actor?.hospitalId || ""
+  });
   await store.addAuditEvent(
-    auditEnvelope("transfer.created", actor, record, {
-      transferChainId,
-      tokenScope: "app"
-    })
+    auditEnvelope("transfer.created", actor, record, auditMetadata)
   );
 
   return record;
@@ -109,11 +138,14 @@ export async function shareTransfer(handoffId, actor) {
     }
   });
 
+  const auditMetadata = await enrichAuditMetadata(actor, record, {
+    tokenScope: "app",
+    shortCode,
+    actorLoginId: actor?.loginId || "",
+    hospitalId: actor?.hospitalId || ""
+  });
   await store.addAuditEvent(
-    auditEnvelope("qr.generated", actor, record, {
-      tokenScope: "app",
-      shortCode
-    })
+    auditEnvelope("qr.generated", actor, record, auditMetadata)
   );
 
   return {
@@ -157,11 +189,15 @@ export async function resolveShare(shortCode, token, actor) {
     throw createError("Transfer not found.", 404);
   }
 
+  const auditMetadata = await enrichAuditMetadata(actor, record, {
+    tokenScope: "view",
+    shortCode,
+    facility: actor?.facility || record?.receivingFacility || "",
+    actorLoginId: actor?.loginId || "",
+    hospitalId: actor?.hospitalId || ""
+  });
   await store.addAuditEvent(
-    auditEnvelope("qr.accessed", actor, record, {
-      tokenScope: "view",
-      shortCode
-    })
+    auditEnvelope("qr.accessed", actor, record, auditMetadata)
   );
 
   return {
@@ -190,11 +226,15 @@ export async function acknowledgeTransfer(handoffId, actor, payload) {
   };
 
   await store.saveAcknowledgement(acknowledgement);
+  const auditMetadata = await enrichAuditMetadata(actor, record, {
+    tokenScope: "app",
+    discrepancies: acknowledgement.discrepancies.length,
+    facility: actor?.facility || record?.receivingFacility || "",
+    actorLoginId: actor?.loginId || "",
+    hospitalId: actor?.hospitalId || ""
+  });
   await store.addAuditEvent(
-    auditEnvelope("transfer.acknowledged", actor, record, {
-      tokenScope: "app",
-      discrepancies: acknowledgement.discrepancies.length
-    })
+    auditEnvelope("transfer.acknowledged", actor, record, auditMetadata)
   );
 
   return acknowledgement;

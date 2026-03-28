@@ -15,6 +15,7 @@ import AdminWorkspace from "./src/screens/AdminWorkspace";
 import NurseWorkspace from "./src/screens/NurseWorkspace";
 import ReceiverWorkspace from "./src/screens/ReceiverWorkspace";
 import SenderWorkspace from "./src/screens/SenderWorkspace";
+import SuperAdminWorkspace from "./src/screens/SuperAdminWorkspace";
 import { ActionButton, Badge, BackgroundGlow, Field, InsetCard, SectionCard } from "./src/ui/primitives";
 import { palette, radii } from "./src/ui/theme";
 
@@ -46,7 +47,7 @@ function LoginCard({ credentials, setCredentials, handleLogin }) {
   return (
     <SectionCard
       title="Hospital-controlled sign in"
-      subtitle="No self-registration. Login IDs and passwords are created by the hospital admin."
+      subtitle="No self-registration. Super admin creates hospitals, hospital admins create staff, and every login uses issued credentials."
       tone="raised"
     >
       <Field
@@ -65,6 +66,7 @@ function LoginCard({ credentials, setCredentials, handleLogin }) {
       <ActionButton label="Sign in" onPress={handleLogin} />
       <View style={styles.demoBox}>
         <Text style={styles.demoTitle}>Demo credentials</Text>
+        <Text style={styles.demoText}>Super Admin: SUPER-ADMIN-001 / medirelay123</Text>
         <Text style={styles.demoText}>Admin: HOSP-ADMIN-001 / medirelay123</Text>
         <Text style={styles.demoText}>Doctor: DOC-1001 / medirelay123</Text>
         <Text style={styles.demoText}>Nurse: NUR-1001 / medirelay123</Text>
@@ -195,6 +197,8 @@ export default function App() {
 
   const roleLabel = session?.user?.role === "hospital_admin"
     ? "Hospital Admin"
+    : session?.user?.role === "system_admin"
+      ? "Super Admin"
     : session?.user?.role === "doctor"
       ? "Doctor"
       : session?.user?.role === "nurse"
@@ -218,7 +222,7 @@ export default function App() {
                 <Text style={styles.heroEyebrow}>Secure hospital-controlled QR access</Text>
                 <Text style={styles.heroTitle}>Hospital creates every account</Text>
                 <Text style={styles.heroSubtitle}>
-                  Doctors can generate and scan QR records. Hospital admins manage staff and see the full QR activity trail.
+                  Super admin onboards hospitals. Hospital admins manage staff. Doctors generate and scan QR records with full activity tracking.
                 </Text>
               </View>
               <LoginCard
@@ -231,7 +235,7 @@ export default function App() {
             <>
               <View style={styles.workspaceHero}>
                 <View style={styles.workspaceTopRow}>
-                  <Badge label={roleLabel} tone={session.user.role === "hospital_admin" ? "caution" : "success"} />
+                  <Badge label={roleLabel} tone={["hospital_admin", "system_admin"].includes(session.user.role) ? "caution" : "success"} />
                   <Pressable
                     style={styles.backButton}
                     onPress={() => {
@@ -259,6 +263,10 @@ export default function App() {
                   setPasswordForm={setPasswordForm}
                   handlePasswordChange={handlePasswordChange}
                 />
+              ) : null}
+
+              {!session.user.forcePasswordChange && session.user.role === "system_admin" ? (
+                <SuperAdminWorkspace session={session} setStatusMessage={setStatusMessage} />
               ) : null}
 
               {!session.user.forcePasswordChange && session.user.role === "hospital_admin" ? (

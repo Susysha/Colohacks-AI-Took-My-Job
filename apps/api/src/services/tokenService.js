@@ -14,6 +14,7 @@ export function createAccessToken(user) {
   return jwt.sign(
     {
       sub: user.userId || user.id,
+      hospitalId: user.hospitalId || "",
       loginId: user.loginId,
       email: user.email,
       role: user.role,

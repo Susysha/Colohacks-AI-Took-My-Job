@@ -9,6 +9,7 @@ const auditEventSchema = new mongoose.Schema(
     actorRole: String,
     department: String,
     facility: String,
+    hospitalId: String,
     patientId: String,
     patientName: String,
     tokenScope: String,

@@ -129,6 +129,22 @@ export function fetchAdminDashboard(accessToken) {
   }).then(handleResponse);
 }
 
+export function fetchSuperAdminDashboard(accessToken) {
+  return fetch(`${API_URL}/superadmin/dashboard`, {
+    headers: withAuth(accessToken)
+  }).then(handleResponse);
+}
+
+export function createHospital(accessToken, payload) {
+  return fetch(`${API_URL}/superadmin/hospitals`, {
+    method: "POST",
+    headers: withAuth(accessToken, {
+      "Content-Type": "application/json"
+    }),
+    body: JSON.stringify(payload)
+  }).then(handleResponse);
+}
+
 export function createStaff(accessToken, payload) {
   return fetch(`${API_URL}/admin/staff`, {
     method: "POST",
