@@ -1,0 +1,16 @@
+{
+  "name": "medirelay",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace apps/api run dev",
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:mobile": "npm --workspace apps/mobile run start",
+    "setup:whisper": "npm --workspace apps/api run setup:whisper",
+    "test:shared": "node --test packages/shared/src/transfer.test.js"
+  }
+}

@@ -1,0 +1,14 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: medirelay-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: medirelay
+    volumes:
+      - medirelay_mongo_data:/data/db
+
+volumes:
+  medirelay_mongo_data:

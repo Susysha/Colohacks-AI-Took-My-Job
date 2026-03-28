@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "MediRelay",
+    "slug": "medirelay",
+    "scheme": "medirelay",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-sqlite",
+      "expo-camera",
+      "@react-native-voice/voice"
+    ],
+    "extra": {
+      "apiUrl": "http://192.168.103.141:5000"
+    },
+    "android": {
+      "package": "com.medirelay.app",
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA"
+      ]
+    }
+  }
+}

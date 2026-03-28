@@ -1,0 +1,10 @@
+{
+  "name": "MediRelay Receiver",
+  "short_name": "MediRelay",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#071d1b",
+  "theme_color": "#0f766e",
+  "icons": []
+}
+

@@ -1,0 +1,17 @@
+node_modules/
+.expo/
+.expo-shared/
+dist/
+build/
+.DS_Store
+.env
+.env.local
+coverage/
+*.log
+*.err
+apps/web/dist/
+apps/mobile/.expo/
+apps/mobile/.expo-export/
+apps/mobile/android/
+apps/mobile/ios/
+whisper/models/
