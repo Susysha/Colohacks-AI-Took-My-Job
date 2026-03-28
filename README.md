@@ -153,7 +153,7 @@ MediRelay directly addresses patient safety gaps in inter-hospital transfers —
 
 ## Team
 
-Built at [Hackathon Name] · App Development Track
+Built at ColoHacks DBIT · App Development Track
 
 ---
 
