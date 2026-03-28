@@ -1,5 +1,5 @@
 # Colohacks-AI-Took-My-Job
-# MediRelay 🏥
+# MediRelay 
 ### Structured Inter-Hospital Patient Handoff Application
 
 > Built for App Development Track | SDG 3: Good Health & Well-Being
@@ -155,8 +155,3 @@ MediRelay directly addresses patient safety gaps in inter-hospital transfers —
 
 Built at ColoHacks DBIT · App Development Track
 
----
-
-## License
-
-MIT
