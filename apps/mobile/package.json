@@ -4,14 +4,14 @@
   "private": true,
   "main": "./index.js",
   "scripts": {
-    "start": "expo start",
+    "start": "expo start --clear --host lan",
+    "start:tunnel": "expo start --clear --tunnel",
     "start:dev-client": "expo start --dev-client --scheme medirelay",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },
   "dependencies": {
     "@medirelay/shared": "1.0.0",
-    "@react-native-voice/voice": "^3.2.4",
     "expo": "~52.0.11",
     "expo-av": "~15.0.1",
     "expo-camera": "~16.0.7",
@@ -20,8 +20,10 @@
     "expo-file-system": "~18.0.12",
     "expo-sqlite": "~15.0.6",
     "expo-status-bar": "~2.0.0",
+    "promise": "^8.3.0",
     "react": "18.3.1",
     "react-native": "0.76.3",
-    "react-native-qrcode-svg": "^6.3.14"
+    "react-native-qrcode-svg": "^6.3.14",
+    "react-native-svg": "^15.15.4"
   }
 }

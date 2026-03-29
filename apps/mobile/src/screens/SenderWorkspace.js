@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Clipboard, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import {
   buildTransferPayload,
@@ -304,9 +304,8 @@ export default function SenderWorkspace({ session, setStatusMessage, onActivityC
 
   function handleCopyLink() {
     if (!shareState?.shortUrl) return;
-    Clipboard.setString(shareState.shortUrl);
-    setCopyStatus("Link copy ho gaya.");
-    setStatusMessage("Secure link clipboard me copy ho gaya.");
+    setCopyStatus("Link neeche visible hai. Manual copy use karo.");
+    setStatusMessage("Secure link ready hai. Abhi manual copy use karo.");
   }
 
   function handleCreateAnother() {

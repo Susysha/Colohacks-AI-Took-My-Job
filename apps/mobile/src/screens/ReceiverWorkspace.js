@@ -31,7 +31,7 @@ export default function ReceiverWorkspace({ session, setStatusMessage, onActivit
   const activeReceiverRecord = receiverState.data?.record || receiverState.payloadRecord;
   const activeReceiverSnapshot = useMemo(() => activeReceiverRecord?.criticalSnapshot, [activeReceiverRecord]);
 
-  async function handleOpenReceiverRecord() {
+  async function resolveReceiverInput(inputValue, source = "manual") {
     if (!session?.accessToken || session.user.role !== "doctor") {
       setReceiverState({
         mode: "idle",
@@ -39,10 +39,10 @@ export default function ReceiverWorkspace({ session, setStatusMessage, onActivit
         data: null,
         payloadRecord: null
       });
-      return;
+      return false;
     }
 
-    const parsed = parseSecureShareInput(receiverInput);
+    const parsed = parseSecureShareInput(inputValue);
 
     if (parsed.mode === "empty") {
       setReceiverState({
@@ -51,12 +51,12 @@ export default function ReceiverWorkspace({ session, setStatusMessage, onActivit
         data: null,
         payloadRecord: null
       });
-      return;
+      return false;
     }
 
     if (parsed.mode === "error") {
       setReceiverState({ mode: "idle", error: parsed.error, data: null, payloadRecord: null });
-      return;
+      return false;
     }
 
     if (parsed.mode === "link") {
@@ -64,15 +64,20 @@ export default function ReceiverWorkspace({ session, setStatusMessage, onActivit
         const data = await fetchSharedTransfer(session.accessToken, parsed.shortCode, parsed.token);
         setReceiverState({ mode: "link", error: "", data, payloadRecord: null });
         await onActivityChanged(session.accessToken);
-        setStatusMessage("Doctor access logged and receiver record opened.");
+        setStatusMessage(
+          source === "scan"
+            ? "QR scanned and patient record opened."
+            : "Doctor access logged and receiver record opened."
+        );
+        return true;
       } catch (error) {
         setReceiverState({ mode: "link", error: error.message, data: null, payloadRecord: null });
+        return false;
       }
-      return;
     }
 
     try {
-      const lines = receiverInput
+      const lines = inputValue
         .split("\n")
         .map((item) => item.trim())
         .filter(Boolean);
@@ -82,10 +87,20 @@ export default function ReceiverWorkspace({ session, setStatusMessage, onActivit
           : parsed.payload;
       const payloadRecord = decodeQrPayload(payloadToDecode);
       setReceiverState({ mode: "payload", error: "", data: null, payloadRecord });
-      setStatusMessage("Offline QR payload decoded inside the mobile app.");
+      setStatusMessage(
+        source === "scan"
+          ? "QR scanned and offline payload opened."
+          : "Offline QR payload decoded inside the mobile app."
+      );
+      return true;
     } catch (error) {
       setReceiverState({ mode: "payload", error: error.message, data: null, payloadRecord: null });
+      return false;
     }
+  }
+
+  async function handleOpenReceiverRecord() {
+    await resolveReceiverInput(receiverInput, "manual");
   }
 
   async function handleOpenScanner() {
@@ -107,12 +122,28 @@ export default function ReceiverWorkspace({ session, setStatusMessage, onActivit
     setStatusMessage("Camera scanner ready. Point it at a MediRelay QR code.");
   }
 
-  function handleBarcodeScanned(event) {
+  async function handleBarcodeScanned(event) {
     if (scannerLocked) return;
+
+    const scannedValue = String(event?.data || "").trim();
+    if (!scannedValue) {
+      setStatusMessage("QR scan empty tha. Dobara try karo.");
+      return;
+    }
+
     setScannerLocked(true);
-    setScannerOpen(false);
-    setReceiverInput(event.data || "");
-    setStatusMessage("QR scanned. Review the secure link and open the record.");
+    setReceiverInput(scannedValue);
+    setStatusMessage("QR scanned. Record open kiya ja raha hai...");
+
+    const didOpen = await resolveReceiverInput(scannedValue, "scan");
+
+    if (didOpen) {
+      setScannerOpen(false);
+      return;
+    }
+
+    setScannerLocked(false);
+    setStatusMessage("QR scan read hua, lekin record open nahi hua. Same screen par dobara scan kar sakte ho.");
   }
 
   function toggleDiscrepancy(label) {
@@ -206,11 +237,20 @@ export default function ReceiverWorkspace({ session, setStatusMessage, onActivit
               barcodeScannerSettings={{
                 barcodeTypes: ["qr"]
               }}
-              onBarcodeScanned={handleBarcodeScanned}
+              onBarcodeScanned={scannerLocked ? undefined : handleBarcodeScanned}
               style={styles.scannerView}
             />
-            <Text style={styles.helperText}>Scan the secure doctor-access QR.</Text>
-            <ActionButton label="Close scanner" variant="ghost" onPress={() => setScannerOpen(false)} />
+            <Text style={styles.helperText}>
+              {scannerLocked ? "QR detect ho gaya. Record khol rahe hain..." : "Scan the secure doctor-access QR."}
+            </Text>
+            <ActionButton
+              label="Close scanner"
+              variant="ghost"
+              onPress={() => {
+                setScannerOpen(false);
+                setScannerLocked(false);
+              }}
+            />
           </InsetCard>
         ) : null}
       </SectionCard>

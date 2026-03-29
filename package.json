@@ -10,6 +10,7 @@
     "dev:api": "npm --workspace apps/api run dev",
     "dev:web": "npm --workspace apps/web run dev",
     "dev:mobile": "npm --workspace apps/mobile run start",
+    "fix:android-studio": "powershell -ExecutionPolicy Bypass -File .\\scripts\\fix-android-studio.ps1",
     "setup:whisper": "npm --workspace apps/api run setup:whisper",
     "test:shared": "node --test packages/shared/src/transfer.test.js"
   }

@@ -3,13 +3,13 @@
     "name": "MediRelay",
     "slug": "medirelay",
     "scheme": "medirelay",
+    "newArchEnabled": true,
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "plugins": [
       "expo-sqlite",
-      "expo-camera",
-      "@react-native-voice/voice"
+      "expo-camera"
     ],
     "extra": {
       "apiUrl": "http://192.168.103.141:5000"
